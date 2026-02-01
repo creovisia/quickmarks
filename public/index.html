@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Mark System</title>
+    <link rel="stylesheet" href="styles.css">
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Auth Screen -->
+    <div id="authScreen" class="auth-screen hidden">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>📚 School Mark System</h1>
+                <p>Sign in to continue</p>
+            </div>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    Sign In
+                </button>
+            </form>
+            
+            <div id="authError" class="error-message hidden"></div>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
+            </div>
+            
+            <div id="registerForm" class="register-form hidden">
+                <h2>Register New Account</h2>
+                <form id="registerFormElement">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="regName" required placeholder="Enter full name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="regEmail" required placeholder="Enter your email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="regPassword" required placeholder="Enter password (min 6 characters)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="regRole" required>
+                            <option value="">Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="student">Student</option>
+                            <option value="parent">Parent</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Register
+                    </button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="#" id="showLogin">Sign In</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div id="appScreen" class="app-screen hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">📚 School Mark System</h1>
+                <span id="userRoleBadge" class="role-badge"></span>
+            </div>
+            
+            <div class="header-right">
+                <div class="user-menu">
+                    <button id="profileMenuBtn" class="btn btn-secondary">
+                        <span id="userNameDisplay">User</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    
+                    <div id="profileMenu" class="profile-menu hidden">
+                        <div class="menu-header">
+                            <span id="menuUserName">User Name</span>
+                            <span id="menuUserEmail" class="user-email">user@example.com</span>
+                            <span id="menuUserRole" class="user-role">Role</span>
+                        </div>
+                        
+                        <ul class="menu-items">
+                            <li>
+                                <a href="#" id="myProfile">
+                                    <span>👤</span> My Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" id="switchAccount">
+                                    <span>🔄</span> Switch Account
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#" id="logout" class="logout">
+                                    <span>🚪</span> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" class="dashboard hidden">
+                <div class="dashboard-header">
+                    <h2>Admin Dashboard</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" onclick="showModal('studentModal')">
+                            ➕ Add Student
+                        </button>
+                        <button class="btn btn-primary" onclick="showModal('classModal')">
+                            ➕ Add Class
+                        </button>
+                        <button class="btn btn-primary" onclick="showModal('subjectModal')">
+                            ➕ Add Subject
+                        </button>
+                        <button class="btn btn-primary" onclick="showModal('examModal')">
+                            ➕ Add Exam
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👨‍🎓</div>
+                        <div class="stat-info">
+                            <h3 id="totalStudents">0</h3>
+                            <p>Total Students</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-info">
+                            <h3 id="totalClasses">0</h3>
+                            <p>Total Classes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-info">
+                            <h3 id="totalSubjects">0</h3>
+                            <p>Subjects</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <h3 id="totalExams">0</h3>
+                            <p>Exams</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-content">
+                    <div class="content-section">
+                        <h3>Recent Students</h3>
+                        <div id="recentStudents" class="data-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Roll No</th>
+                                        <th>Class</th>
+                                        <th>Section</th>
+                                        <th>Parent</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentStudentsBody">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teacher Dashboard -->
+            <div id="teacherDashboard" class="dashboard hidden">
+                <div class="dashboard-header">
+                    <h2>Teacher Dashboard</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" onclick="showModal('marksEntryModal')">
+                            📝 Enter Marks
+                        </button>
+                        <button class="btn btn-secondary" onclick="showModal('reportCardModal')">
+                            📄 Generate Report Card
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="dashboard-content">
+                    <div class="content-section">
+                        <h3>Marks Entry Queue</h3>
+                        <div id="marksQueue" class="data-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th>Exam</th>
+                                        <th>Total Students</th>
+                                        <th>Pending</th>
+                                        <th>Completed</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="marksQueueBody">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student/Parent Dashboard -->
+            <div id="studentDashboard" class="dashboard hidden">
+                <div class="dashboard-header">
+                    <h2 id="studentDashboardTitle">Student Dashboard</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" onclick="showReportCard()">
+                            📄 View Report Card
+                        </button>
+                        <button class="btn btn-secondary" onclick="printReportCard()">
+                            🖨️ Print Report Card
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="dashboard-content">
+                    <div class="content-section">
+                        <h3>Student Information</h3>
+                        <div id="studentInfo" class="student-info-card">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h3>Recent Results</h3>
+                        <div id="recentResults" class="results-container">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students List -->
+            <div id="studentsList" class="content-section hidden">
+                <div class="section-header">
+                    <h3>All Students</h3>
+                    <button class="btn btn-primary" onclick="showModal('studentModal')">
+                        ➕ Add Student
+                    </button>
+                </div>
+                
+                <div class="filters">
+                    <select id="filterClass" class="form-control">
+                        <option value="">All Classes</option>
+                    </select>
+                    <select id="filterSection" class="form-control">
+                        <option value="">All Sections</option>
+                    </select>
+                    <input type="text" id="searchStudent" class="form-control" placeholder="Search student...">
+                </div>
+                
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Roll No</th>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>Parent Name</th>
+                                <th>Parent Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Classes List -->
+            <div id="classesList" class="content-section hidden">
+                <div class="section-header">
+                    <h3>Classes</h3>
+                    <button class="btn btn-primary" onclick="showModal('classModal')">
+                        ➕ Add Class
+                    </button>
+                </div>
+                
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>Students</th>
+                                <th>Subjects</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classesTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Subjects List -->
+            <div id="subjectsList" class="content-section hidden">
+                <div class="section-header">
+                    <h3>Subjects</h3>
+                    <button class="btn btn-primary" onclick="showModal('subjectModal')">
+                        ➕ Add Subject
+                    </button>
+                </div>
+                
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Subject Name</th>
+                                <th>Class</th>
+                                <th>Max Marks</th>
+                                <th>Passing Marks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Exams List -->
+            <div id="examsList" class="content-section hidden">
+                <div class="section-header">
+                    <h3>Exams</h3>
+                    <button class="btn btn-primary" onclick="showModal('examModal')">
+                        ➕ Add Exam
+                    </button>
+                </div>
+                
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Exam Name</th>
+                                <th>Class</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="examsTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- Navigation Sidebar -->
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li>
+                    <a href="#" class="nav-item active" data-page="dashboard">
+                        <span>📊</span> Dashboard
+                    </a>
+                </li>
+                <li class="admin-only hidden">
+                    <a href="#" class="nav-item" data-page="students">
+                        <span>👨‍🎓</span> Students
+                    </a>
+                </li>
+                <li class="admin-only hidden">
+                    <a href="#" class="nav-item" data-page="classes">
+                        <span>📚</span> Classes
+                    </a>
+                </li>
+                <li class="admin-only hidden">
+                    <a href="#" class="nav-item" data-page="subjects">
+                        <span>📖</span> Subjects
+                    </a>
+                </li>
+                <li class="admin-only hidden">
+                    <a href="#" class="nav-item" data-page="exams">
+                        <span>📝</span> Exams
+                    </a>
+                </li>
+                <li class="teacher-only hidden">
+                    <a href="#" class="nav-item" data-page="marksEntry">
+                        <span>✍️</span> Marks Entry
+                    </a>
+                </li>
+                <li class="student-parent-only hidden">
+                    <a href="#" class="nav-item" data-page="reportCard">
+                        <span>📄</span> Report Card
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Modals -->
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add/Edit Student</h3>
+                <button class="close-modal" onclick="hideModal('studentModal')">&times;</button>
+            </div>
+            <form id="studentForm">
+                <input type="hidden" id="studentId">
+                
+                <div class="form-group">
+                    <label>Student Name *</label>
+                    <input type="text" id="studentName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Roll Number *</label>
+                    <input type="text" id="rollNumber" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Class *</label>
+                    <select id="studentClass" required>
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Section *</label>
+                    <select id="studentSection" required>
+                        <option value="">Select Section</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Parent Name *</label>
+                    <input type="text" id="parentName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Parent Phone *</label>
+                    <input type="tel" id="parentPhone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email (Optional)</label>
+                    <input type="email" id="studentEmail">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('studentModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Save Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Class Modal -->
+    <div id="classModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add/Edit Class</h3>
+                <button class="close-modal" onclick="hideModal('classModal')">&times;</button>
+            </div>
+            <form id="classForm">
+                <input type="hidden" id="classId">
+                
+                <div class="form-group">
+                    <label>Class Name *</label>
+                    <select id="className" required>
+                        <option value="">Select Class</option>
+                        <option value="1">Class 1</option>
+                        <option value="2">Class 2</option>
+                        <option value="3">Class 3</option>
+                        <option value="4">Class 4</option>
+                        <option value="5">Class 5</option>
+                        <option value="6">Class 6</option>
+                        <option value="7">Class 7</option>
+                        <option value="8">Class 8</option>
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                        <option value="11">Class 11</option>
+                        <option value="12">Class 12</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Section *</label>
+                    <input type="text" id="classSection" required placeholder="A, B, C, etc.">
+                </div>
+                
+                <div class="form-group">
+                    <label>Class Teacher</label>
+                    <input type="text" id="classTeacher" placeholder="Teacher name">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('classModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Save Class
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Subject Modal -->
+    <div id="subjectModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add/Edit Subject</h3>
+                <button class="close-modal" onclick="hideModal('subjectModal')">&times;</button>
+            </div>
+            <form id="subjectForm">
+                <input type="hidden" id="subjectId">
+                
+                <div class="form-group">
+                    <label>Subject Name *</label>
+                    <input type="text" id="subjectName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Class *</label>
+                    <select id="subjectClass" required>
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Maximum Marks *</label>
+                    <input type="number" id="maxMarks" required min="1" value="100">
+                </div>
+                
+                <div class="form-group">
+                    <label>Passing Marks *</label>
+                    <input type="number" id="passingMarks" required min="1" value="35">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('subjectModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Save Subject
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exam Modal -->
+    <div id="examModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add/Edit Exam</h3>
+                <button class="close-modal" onclick="hideModal('examModal')">&times;</button>
+            </div>
+            <form id="examForm">
+                <input type="hidden" id="examId">
+                
+                <div class="form-group">
+                    <label>Exam Name *</label>
+                    <select id="examName" required>
+                        <option value="">Select Exam Type</option>
+                        <option value="Unit Test 1">Unit Test 1</option>
+                        <option value="Unit Test 2">Unit Test 2</option>
+                        <option value="Midterm">Midterm</option>
+                        <option value="Final">Final Exam</option>
+                        <option value="Annual">Annual Exam</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Class *</label>
+                    <select id="examClass" required>
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Exam Date *</label>
+                    <input type="date" id="examDate" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('examModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Save Exam
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Marks Entry Modal -->
+    <div id="marksEntryModal" class="modal modal-large hidden">
+        <div class="modal-content modal-content-large">
+            <div class="modal-header">
+                <h3>Enter Marks</h3>
+                <button class="close-modal" onclick="hideModal('marksEntryModal')">&times;</button>
+            </div>
+            
+            <div class="marks-entry-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Select Class *</label>
+                        <select id="marksClass" required onchange="loadStudentsForMarks()">
+                            <option value="">Select Class</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Select Exam *</label>
+                        <select id="marksExam" required onchange="loadSubjectsForMarks()">
+                            <option value="">Select Exam</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Select Student *</label>
+                        <select id="marksStudent" required onchange="loadSubjectsForStudent()">
+                            <option value="">Select Student</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="marksSubjectContainer" class="marks-subject-container">
+                    <!-- Dynamic subjects will be loaded here -->
+                </div>
+                
+                <div class="marks-summary">
+                    <h4>Summary (Auto-calculated)</h4>
+                    <div class="summary-row">
+                        <span>Total Obtained: <strong id="totalObtained">0</strong></span>
+                        <span>Total Maximum: <strong id="totalMaximum">0</strong></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Overall Percentage: <strong id="overallPercentage">0%</strong></span>
+                        <span>Grade: <strong id="overallGrade">-</strong></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Status: <strong id="passFailStatus">-</strong></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Teacher Remark</label>
+                    <textarea id="teacherRemark" rows="3" placeholder="Enter teacher's remarks"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('marksEntryModal')">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="submitMarks()">
+                        Submit Marks
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Card Modal -->
+    <div id="reportCardModal" class="modal modal-large hidden">
+        <div class="modal-content modal-content-large">
+            <div class="modal-header">
+                <h3>Report Card</h3>
+                <button class="close-modal" onclick="hideModal('reportCardModal')">&times;</button>
+            </div>
+            
+            <div class="report-card-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Select Student *</label>
+                        <select id="reportStudent" required onchange="loadReportCard()">
+                            <option value="">Select Student</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Select Exam *</label>
+                        <select id="reportExam" required onchange="loadReportCard()">
+                            <option value="">Select Exam</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="reportCardContent" class="report-card-content">
+                    <!-- Report card will be generated here -->
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('reportCardModal')">
+                        Close
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="printReportCard()">
+                        🖨️ Print Report Card
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

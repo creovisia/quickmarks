@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Students collection
+    match /students/{studentId} {
+      allow read: if request.auth != null;
+      allow write: if isSignedIn() && (isAdmin() || isTeacher());
+    }
+    
+    // Classes collection
+    match /classes/{classId} {
+      allow read: if request.auth != null;
+      allow write: if isSignedIn() && (isAdmin() || isTeacher());
+    }
+    
+    // Subjects collection
+    match /subjects/{subjectId} {
+      allow read: if request.auth != null;
+      allow write: if isSignedIn() && (isAdmin() || isTeacher());
+    }
+    
+    // Exams collection
+    match /exams/{examId} {
+      allow read: if request.auth != null;
+      allow write: if isSignedIn() && (isAdmin() || isTeacher());
+    }
+    
+    // Marks collection
+    match /marks/{markId} {
+      allow read: if isSignedIn() && (isAdmin() || isTeacher() || isStudentOwner());
+      allow create: if isSignedIn() && (isAdmin() || isTeacher());
+      allow update: if isSignedIn() && (isAdmin() || isTeacher());
+      allow delete: if isSignedIn() && (isAdmin() || isTeacher());
+    }
+    
+    // Report cards collection
+    match /reportCards/{reportCardId} {
+      allow read: if isSignedIn() && (isAdmin() || isTeacher() || isStudentOwner());
+      allow create: if isSignedIn() && (isAdmin() || isTeacher());
+      allow update: if isSignedIn() && (isAdmin() || isTeacher());
+    }
+    
+    // Notification logs
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && (isAdmin() || isTeacher());
+      allow create: if isSignedIn() && (isAdmin() || isTeacher());
+    }
+  }
+}
+
+// Helper functions
+function isSignedIn() {
+  return request.auth != null;
+}
+
+function isAdmin() {
+  return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+}
+
+function isTeacher() {
+  return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+}
+
+function isStudentOwner() {
+  return isSignedIn() && 
+         resource.data.studentId == request.auth.uid ||
+         get(/databases/$(database)/documents/students/$(resource.data.studentId)).data.parentId == request.auth.uid;
+}
